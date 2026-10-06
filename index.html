@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="data:," />
+  <title>Cân bằng đội LoL & Valorant</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
+    :root {
+      color-scheme: dark light;
+      --bg:#080a0d; --panel:#101318; --panel-2:#15191f; --field:#0c0f13;
+      --ink:#f1f5f9; --muted:#a6afbb; --faint:#737d8a; --line:#242a32;
+      --cyan:#19ddea; --cyan-bright:#00f3ff; --cyan-soft:rgba(0,243,255,.09);
+      --red:#ff3973; --red-bright:#ff0055; --red-soft:rgba(255,0,85,.09);
+      --green:#52d6aa; --amber:#f4b95e; --shadow:0 20px 60px rgba(0,0,0,.32);
+      --radius:16px;
+    }
+    @media (prefers-color-scheme:light) {
+      :root {
+        --bg:#11161d; --panel:#192028; --panel-2:#202832; --field:#131920;
+        --ink:#f7fafc; --muted:#b3beca; --faint:#8793a1; --line:#303b47;
+        --cyan:#2ee8f2; --cyan-bright:#68f7ff; --cyan-soft:rgba(46,232,242,.10);
+        --red:#ff4e7f; --red-bright:#ff7a9f; --red-soft:rgba(255,78,127,.10);
+        --green:#5adbb0; --amber:#ffc36b; --shadow:0 18px 48px rgba(0,0,0,.28);
+      }
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;min-width:320px;background:var(--bg);color:var(--ink);font-family:"DM Sans",system-ui,sans-serif;line-height:1.45}
+    button,input,select{font:inherit;color:inherit}
+    button{cursor:pointer}
+    svg{width:18px;height:18px;stroke-width:1.8;flex:0 0 auto}
+    .app{width:min(1180px,calc(100% - 32px));margin:auto;padding:28px 0 68px}
+    .topline{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:24px}
+    .eyebrow{font:600 11px/1.2 "IBM Plex Mono",monospace;letter-spacing:.15em;color:var(--cyan);margin-bottom:8px}
+    h1{font-size:clamp(25px,3vw,38px);line-height:1.07;letter-spacing:-.045em;margin:0;max-width:720px}
+    .intro{color:var(--muted);font-size:14px;margin:10px 0 0;max-width:670px}
+    .reset-btn,.icon-btn,.copy-btn,.secondary-btn,.generate-btn{border:0;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:10px;font-weight:700;transition:background .18s,border-color .18s,transform .18s,color .18s}
+    .reset-btn{border:1px solid var(--line);background:var(--panel);height:42px;padding:0 14px;box-shadow:0 4px 14px rgba(0,0,0,.04);white-space:nowrap}
+    .reset-btn:hover,.secondary-btn:hover,.copy-btn:hover{border-color:var(--faint);background:var(--panel-2)}
+    .reset-btn:active,.icon-btn:active,.copy-btn:active,.secondary-btn:active,.generate-btn:active{transform:translateY(1px)}
+    .overview{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);background:var(--panel);border-radius:var(--radius);margin-bottom:22px;overflow:hidden;box-shadow:var(--shadow)}
+    .stat{padding:15px 18px;border-right:1px solid var(--line);display:flex;align-items:center;gap:11px}.stat:last-child{border-right:0}
+    .stat-icon{width:32px;height:32px;border-radius:9px;background:var(--panel-2);display:grid;place-items:center;color:var(--cyan)}
+    .stat-icon svg{width:16px;height:16px}
+    .stat b{font:600 13px "IBM Plex Mono",monospace;display:block}.stat span{font-size:12px;color:var(--muted)}
+    .layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(300px,.75fr);gap:22px;align-items:start}
+    .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .panel-head{display:flex;align-items:flex-start;justify-content:space-between;padding:19px 20px 15px;border-bottom:1px solid var(--line);gap:14px}
+    .title-wrap{display:flex;gap:11px;align-items:flex-start}.title-wrap>svg{color:var(--cyan);margin-top:2px}
+    h2{font-size:16px;letter-spacing:-.02em;margin:0}.hint{font-size:12px;color:var(--muted);margin-top:3px}
+    .count-badge{font:600 11px "IBM Plex Mono",monospace;color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:5px 9px}
+    .players{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px}
+    .player-card{background:var(--panel-2);border:1px solid transparent;border-radius:12px;padding:12px;position:relative;transition:border-color .18s,background .18s}
+    .player-card:focus-within{border-color:color-mix(in srgb,var(--cyan) 55%,transparent);background:var(--panel)}
+    .player-top{display:grid;grid-template-columns:26px minmax(0,1fr) 132px;align-items:center;gap:8px}
+    .slot{font:600 11px "IBM Plex Mono",monospace;color:var(--faint)}
+    input,.select{width:100%;height:36px;border:1px solid var(--line);border-radius:8px;background:var(--field);padding:0 10px;outline:none;font-size:13px}
+    input:focus,.select:focus{border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan-soft)}
+    .role-row{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px;padding-left:34px}
+    .role{font:600 10px "IBM Plex Mono",monospace;letter-spacing:.02em;border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:6px;padding:5px 7px;line-height:1}
+    .role:hover{border-color:var(--faint);color:var(--ink)}
+    .role.active{color:var(--cyan);border-color:color-mix(in srgb,var(--cyan) 50%,transparent);background:var(--cyan-soft)}
+    .side-stack{display:grid;gap:22px;position:sticky;top:18px}
+    .rules-body{padding:16px}
+    .rule-form{display:grid;gap:10px}
+    .connector{display:flex;align-items:center;gap:8px;color:var(--faint);font:600 10px "IBM Plex Mono",monospace;letter-spacing:.08em}
+    .connector:before,.connector:after{content:"";height:1px;background:var(--line);flex:1}
+    .type-switch{display:grid;grid-template-columns:1fr 1fr;background:var(--panel-2);border:1px solid var(--line);padding:3px;border-radius:9px;gap:3px}
+    .type-switch button{height:33px;border:0;border-radius:6px;background:transparent;font-size:11px;font-weight:700;color:var(--muted)}
+    .type-switch button.active.same{background:var(--cyan-soft);color:var(--cyan)}
+    .type-switch button.active.opposite{background:var(--red-soft);color:var(--red)}
+    .secondary-btn{height:38px;border:1px solid var(--line);background:var(--panel);font-size:12px}
+    .rule-list{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px}
+    .empty-rules{font-size:12px;color:var(--faint);border:1px dashed var(--line);border-radius:9px;padding:11px;width:100%;text-align:center}
+    .rule-chip{display:flex;align-items:center;gap:6px;max-width:100%;border-radius:7px;border:1px solid var(--line);background:var(--panel-2);padding:5px 5px 5px 8px;font-size:11px}
+    .rule-chip.same{color:var(--cyan)}.rule-chip.opposite{color:var(--red)}
+    .rule-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:205px}
+    .rule-chip button{background:transparent;border:0;padding:2px;color:var(--faint);display:grid;place-items:center}.rule-chip svg{width:13px;height:13px}
+    .generate-wrap{padding:15px;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(135deg,var(--panel),var(--panel-2));box-shadow:var(--shadow)}
+    .generate-btn{height:52px;width:100%;background:var(--cyan);color:#001215;font:700 13px "IBM Plex Mono",monospace;letter-spacing:.06em;box-shadow:0 0 0 1px color-mix(in srgb,var(--cyan) 50%,transparent),0 0 24px var(--cyan-soft)}
+    .generate-btn:hover{background:var(--cyan-bright);box-shadow:0 0 0 1px var(--cyan),0 0 32px var(--cyan-soft)}
+    .generate-btn:disabled{opacity:.75;cursor:wait}
+    .generate-meta{display:flex;justify-content:space-between;gap:10px;color:var(--faint);font:500 10px "IBM Plex Mono",monospace;margin-top:9px}
+    .results-section{margin-top:22px}
+    .results-heading{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:12px}
+    .results-heading h2{font-size:19px}.results-heading p{margin:3px 0 0;color:var(--muted);font-size:12px}
+    .copy-btn{height:38px;border:1px solid var(--line);background:var(--panel);padding:0 13px;font-size:12px}
+    .teams{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .team-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);position:relative}
+    .team-card.blue{border-top:2px solid var(--cyan);box-shadow:var(--shadow),0 -10px 35px var(--cyan-soft)}
+    .team-card.red{border-top:2px solid var(--red);box-shadow:var(--shadow),0 -10px 35px var(--red-soft)}
+    .team-head{padding:18px 19px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
+    .team-label{display:flex;align-items:center;gap:9px}.team-label b{font:600 13px "IBM Plex Mono",monospace;letter-spacing:.08em}.blue .team-label{color:var(--cyan)}.red .team-label{color:var(--red)}
+    .power{text-align:right}.power strong{font:600 26px/1 "IBM Plex Mono",monospace;display:block}.power span{font-size:9px;color:var(--faint);letter-spacing:.08em;text-transform:uppercase}
+    .roster{list-style:none;margin:0;padding:8px}
+    .member{display:grid;grid-template-columns:30px minmax(0,1fr) auto;align-items:center;gap:10px;padding:10px;border-radius:9px}.member:nth-child(even){background:var(--panel-2)}
+    .member-num{width:26px;height:26px;border:1px solid var(--line);border-radius:7px;display:grid;place-items:center;font:600 10px "IBM Plex Mono",monospace;color:var(--faint)}
+    .member-name{font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.roles-text{font:500 10px "IBM Plex Mono",monospace;color:var(--muted);margin-top:2px}
+    .rank-tag{font:600 9px "IBM Plex Mono",monospace;color:var(--muted);background:var(--field);border:1px solid var(--line);border-radius:6px;padding:5px 6px;white-space:nowrap}
+    .balance-note{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:11px;margin-top:10px}.balance-note b{color:var(--ink)}
+    .overlay{position:fixed;inset:0;background:rgba(5,7,10,.86);z-index:30;display:none;place-items:center;padding:24px;backdrop-filter:blur(9px)}
+    .overlay.show{display:grid}.scan{width:min(440px,100%);text-align:center;position:relative}
+    .scanner{height:142px;border:1px solid #26313b;background:#0b0f13;border-radius:14px;overflow:hidden;position:relative;box-shadow:0 0 45px rgba(0,243,255,.12)}
+    .scanner:after{content:"";position:absolute;left:0;right:0;height:1px;background:#00f3ff;box-shadow:0 0 16px #00f3ff;animation:scan 1s linear infinite}
+    @keyframes scan{from{top:0}to{top:100%}}
+    .shuffle-lines{position:absolute;inset:16px;display:grid;gap:7px}.shuffle-line{height:15px;border:1px solid #222b34;background:linear-gradient(90deg,#172029 0 18%,#0e171d 18% 34%,#172029 34% 62%,#0e171d 62%);animation:flicker .19s steps(2) infinite}.shuffle-line:nth-child(2n){animation-delay:.08s;width:88%}.shuffle-line:nth-child(3n){width:72%;margin-left:auto}
+    @keyframes flicker{50%{transform:translateX(6px);opacity:.55}}
+    .scan-count{font:600 60px/1 "IBM Plex Mono",monospace;color:#f2f7fa;margin:24px 0 5px;text-shadow:0 0 20px rgba(0,243,255,.45)}
+    .scan-label{font:600 12px "IBM Plex Mono",monospace;color:#00f3ff;letter-spacing:.14em}
+    .toast{position:fixed;right:20px;bottom:20px;z-index:50;max-width:min(370px,calc(100% - 40px));padding:12px 14px;border-radius:11px;background:var(--ink);color:var(--bg);box-shadow:0 16px 50px rgba(0,0,0,.25);display:flex;gap:10px;align-items:flex-start;transform:translateY(18px);opacity:0;pointer-events:none;transition:.22s ease}
+    .toast.show{opacity:1;transform:none}.toast svg{color:var(--cyan);margin-top:1px}.toast strong{display:block;font-size:12px}.toast span{font-size:11px;opacity:.72}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    @media(max-width:900px){.layout{grid-template-columns:1fr}.side-stack{position:static;grid-template-columns:1fr 1fr}.generate-wrap{display:flex;flex-direction:column;justify-content:center}}
+    @media(max-width:680px){.app{width:min(100% - 22px,1180px);padding-top:18px}.topline{align-items:center}.intro{font-size:13px}.reset-btn span{display:none}.reset-btn{width:42px;padding:0}.overview{grid-template-columns:1fr}.stat{border-right:0;border-bottom:1px solid var(--line);padding:11px 14px}.stat:last-child{border-bottom:0}.players{grid-template-columns:1fr;padding:10px}.side-stack{grid-template-columns:1fr}.teams{grid-template-columns:1fr}.results-heading{align-items:flex-start;flex-direction:column}.copy-btn{width:100%}.player-top{grid-template-columns:25px minmax(0,1fr) 118px}.role-row{padding-left:33px}.panel-head{padding:16px}.team-head{padding:16px}.member{grid-template-columns:28px minmax(0,1fr) auto;padding:9px 8px}.rank-tag{font-size:8px}.generate-meta{flex-direction:column;gap:2px}.toast{right:11px;bottom:11px;max-width:calc(100% - 22px)}}
+    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}.scanner:after,.shuffle-line{animation:none!important}}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topline">
+      <div>
+        <div class="eyebrow">CHIA ĐỘI // CÂN BẰNG 5V5</div>
+        <h1>Chia hai đội. Giữ trận đấu cân bằng.</h1>
+        <p class="intro">Tùy chỉnh mười người chơi, thêm luật cùng đội hoặc đối đầu, rồi tìm cách chia đội cân bằng kỹ năng nhất.</p>
+      </div>
+      <button class="reset-btn" id="resetBtn" aria-label="Khôi phục người chơi mặc định" title="Khôi phục người chơi mặc định">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span>Khôi phục đội hình</span>
+      </button>
+    </header>
+
+    <section class="overview" aria-label="Tổng quan cân bằng đội">
+      <div class="stat"><div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div><b id="playerCount">10 / 10</b><span>người chơi sẵn sàng</span></div></div>
+      <div class="stat"><div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m14.5 4.5 5 5L8 21H3v-5Z"/><path d="m13 6 5 5"/></svg></div><div><b id="constraintCount">0 luật</b><span>ràng buộc bắt buộc</span></div></div>
+      <div class="stat"><div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 3v12M18 9v12M3 6h6M15 18h6"/><path d="m14 3-4 4 4 4M10 21l4-4-4-4"/></svg></div><div><b>252 cách chia</b><span>được xét mỗi lượt</span></div></div>
+    </section>
+
+    <div class="layout">
+      <section class="panel" aria-labelledby="rosterTitle">
+        <div class="panel-head"><div class="title-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="m17 11 2 2 4-4"/></svg><div><h2 id="rosterTitle">Thiết lập người chơi</h2><div class="hint">Tên, bậc xếp hạng và vị trí sở trường</div></div></div><div class="count-badge">10 VỊ TRÍ CỐ ĐỊNH</div></div>
+        <div class="players" id="players"></div>
+      </section>
+
+      <aside class="side-stack">
+        <section class="panel" aria-labelledby="rulesTitle">
+          <div class="panel-head"><div class="title-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg><div><h2 id="rulesTitle">Luật ghép đội</h2><div class="hint">Luật bắt buộc được ưu tiên hơn cân bằng</div></div></div></div>
+          <div class="rules-body">
+            <div class="rule-form">
+              <label class="sr-only" for="playerA">Người chơi A</label><select class="select" id="playerA"></select>
+              <div class="connector">GHÉP VỚI</div>
+              <label class="sr-only" for="playerB">Người chơi B</label><select class="select" id="playerB"></select>
+              <div class="type-switch" role="group" aria-label="Loại ràng buộc"><button type="button" class="active same" data-type="SAME_TEAM">Cùng đội</button><button type="button" class="opposite" data-type="OPPOSITE_TEAM">Khác đội</button></div>
+              <button class="secondary-btn" id="addRule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 5v14M5 12h14"/></svg>Thêm luật</button>
+            </div>
+            <div class="rule-list" id="ruleList"></div>
+          </div>
+        </section>
+
+        <div class="generate-wrap">
+          <button class="generate-btn" id="generateBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m6 3 1.5 3L11 7.5 7.5 9 6 12 4.5 9 1 7.5 4.5 6Z"/><path d="m18 12 1.3 2.7L22 16l-2.7 1.3L18 20l-1.3-2.7L14 16l2.7-1.3Z"/><path d="M11.5 14.5 15 11"/></svg>CHIA ĐỘI</button>
+          <div class="generate-meta"><span>TỐI ƯU BẬC + VỊ TRÍ</span><span id="lastRun">SẴN SÀNG</span></div>
+        </div>
+      </aside>
+    </div>
+
+    <section class="results-section" aria-labelledby="resultsTitle">
+      <div class="results-heading"><div><h2 id="resultsTitle">Kết quả chia đội</h2><p id="resultSummary">Đã cân bằng từ đội hình mặc định.</p></div><button class="copy-btn" id="copyBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Sao chép cho Discord</button></div>
+      <div class="teams">
+        <article class="team-card blue"><div class="team-head"><div class="team-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m14.5 17.5-5-5M15 4l5 5L8 21H3v-5Z"/><path d="m14 18 3 3 4-4-3-3"/></svg><b>ĐỘI XANH</b></div><div class="power"><strong id="bluePower">0</strong><span>sức mạnh</span></div></div><ol class="roster" id="blueRoster"></ol></article>
+        <article class="team-card red"><div class="team-head"><div class="team-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9.5 17.5 5-5M9 4 4 9l12 12h5v-5Z"/><path d="m10 18-3 3-4-4 3-3"/></svg><b>ĐỘI ĐỎ</b></div><div class="power"><strong id="redPower">0</strong><span>sức mạnh</span></div></div><ol class="roster" id="redRoster"></ol></article>
+      </div>
+      <div class="balance-note" id="balanceNote"></div>
+    </section>
+  </main>
+
+  <div class="overlay" id="overlay" role="status" aria-live="polite" aria-label="Đang phân tích các cách chia đội"><div class="scan"><div class="scanner"><div class="shuffle-lines"><div class="shuffle-line"></div><div class="shuffle-line"></div><div class="shuffle-line"></div><div class="shuffle-line"></div><div class="shuffle-line"></div><div class="shuffle-line"></div></div></div><div class="scan-count" id="scanCount">2.0</div><div class="scan-label">ĐANG PHÂN TÍCH 252 CÁCH CHIA</div></div></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6 9 17l-5-5"/></svg><div><strong id="toastTitle">Đã sao chép</strong><span id="toastText">Đội hình đã sẵn sàng để dán.</span></div></div>
+
+  <script>
+    (function(){
+      'use strict';
+      var ranks=['Iron/Bronze','Silver/Gold','Plat/Emerald','Diamond+'];
+      var rankLabels={'Iron/Bronze':'Sắt / Đồng','Silver/Gold':'Bạc / Vàng','Plat/Emerald':'Bạch Kim / Lục Bảo','Diamond+':'Kim Cương+'};
+      var weights={'Iron/Bronze':1,'Silver/Gold':2,'Plat/Emerald':3,'Diamond+':4};
+      var roles=['TOP','JUG','MID','BOT','SUP','FLEX'];
+      var roleLabels={TOP:'ĐƯỜNG TRÊN',JUG:'ĐI RỪNG',MID:'ĐƯỜNG GIỮA',BOT:'XẠ THỦ',SUP:'HỖ TRỢ',FLEX:'LINH HOẠT'};
+      var presets=[
+        {id:'p1',name:'Nova',rank:'Diamond+',preferredRoles:['MID','FLEX']},
+        {id:'p2',name:'Kairo',rank:'Plat/Emerald',preferredRoles:['JUG']},
+        {id:'p3',name:'Pixel',rank:'Silver/Gold',preferredRoles:['SUP','MID']},
+        {id:'p4',name:'Vexel',rank:'Plat/Emerald',preferredRoles:['TOP']},
+        {id:'p5',name:'Rook',rank:'Iron/Bronze',preferredRoles:['BOT','FLEX']},
+        {id:'p6',name:'Ghost',rank:'Diamond+',preferredRoles:['JUG','MID']},
+        {id:'p7',name:'Mako',rank:'Silver/Gold',preferredRoles:['TOP','SUP']},
+        {id:'p8',name:'Blitz',rank:'Plat/Emerald',preferredRoles:['BOT']},
+        {id:'p9',name:'Echo',rank:'Iron/Bronze',preferredRoles:['SUP']},
+        {id:'p10',name:'Onyx',rank:'Silver/Gold',preferredRoles:['TOP','FLEX']}
+      ];
+      var players=[],constraints=[],result=null,ruleType='SAME_TEAM',toastTimer=null;
+      var $=function(s){return document.querySelector(s)};
+      var esc=function(s){return String(s).replace(/[&<>'"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]})};
+      function icon(name){
+        if(name==='x')return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+        if(name==='link')return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>';
+        return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m15 4 5 5-5 5M9 20l-5-5 5-5M20 9H4M4 15h16"/></svg>';
+      }
+      function clonePresets(){return presets.map(function(p){return {id:p.id,name:p.name,rank:p.rank,preferredRoles:p.preferredRoles.slice()}})}
+      function renderPlayers(){
+        $('#players').innerHTML=players.map(function(p,i){return '<article class="player-card"><div class="player-top"><span class="slot">'+String(i+1).padStart(2,'0')+'</span><label class="sr-only" for="name-'+p.id+'">Tên người chơi '+(i+1)+'</label><input id="name-'+p.id+'" data-id="'+p.id+'" class="name-input" maxlength="24" value="'+esc(p.name)+'" aria-label="Tên người chơi '+(i+1)+'"><label class="sr-only" for="rank-'+p.id+'">Bậc của '+esc(p.name)+'</label><select id="rank-'+p.id+'" data-id="'+p.id+'" class="select rank-select" aria-label="Bậc của '+esc(p.name)+'">'+ranks.map(function(r){return '<option value="'+r+'"'+(r===p.rank?' selected':'')+'>'+rankLabels[r]+'</option>'}).join('')+'</select></div><div class="role-row" aria-label="Vị trí sở trường của '+esc(p.name)+'">'+roles.map(function(r){return '<button type="button" class="role '+(p.preferredRoles.indexOf(r)>-1?'active':'')+'" data-id="'+p.id+'" data-role="'+r+'" aria-pressed="'+(p.preferredRoles.indexOf(r)>-1)+'">'+roleLabels[r]+'</button>'}).join('')+'</div></article>'}).join('');
+        document.querySelectorAll('.name-input').forEach(function(el){el.addEventListener('input',function(){findPlayer(el.dataset.id).name=el.value;refreshSelects();renderRules()})});
+        document.querySelectorAll('.rank-select').forEach(function(el){el.addEventListener('change',function(){findPlayer(el.dataset.id).rank=el.value})});
+        document.querySelectorAll('.role').forEach(function(el){el.addEventListener('click',function(){var p=findPlayer(el.dataset.id),r=el.dataset.role,idx=p.preferredRoles.indexOf(r);if(idx>-1)p.preferredRoles.splice(idx,1);else p.preferredRoles.push(r);el.classList.toggle('active');el.setAttribute('aria-pressed',String(idx===-1))})});
+      }
+      function findPlayer(id){return players.find(function(p){return p.id===id})}
+      function refreshSelects(){
+        ['playerA','playerB'].forEach(function(id,idx){var sel=$('#'+id),value=sel.value;sel.innerHTML='<option value="">Chọn người chơi '+(idx?'B':'A')+'</option>'+players.map(function(p){return '<option value="'+p.id+'">'+esc(p.name||('Người chơi '+p.id.slice(1)))+'</option>'}).join('');sel.value=value});
+      }
+      function renderRules(){
+        $('#constraintCount').textContent=constraints.length+' luật';
+        $('#ruleList').innerHTML=constraints.length?constraints.map(function(c){var a=findPlayer(c.player1Id),b=findPlayer(c.player2Id),same=c.type==='SAME_TEAM';return '<div class="rule-chip '+(same?'same':'opposite')+'">'+icon(same?'link':'split')+'<span>'+esc(a?a.name:'?')+' '+(same?'cùng đội với':'đối đầu')+' '+esc(b?b.name:'?')+'</span><button type="button" data-remove="'+c.id+'" aria-label="Xóa luật">'+icon('x')+'</button></div>'}).join(''):'<div class="empty-rules">Chưa có luật — chỉ cân bằng kỹ năng</div>';
+        document.querySelectorAll('[data-remove]').forEach(function(btn){btn.addEventListener('click',function(){constraints=constraints.filter(function(c){return c.id!==btn.dataset.remove});renderRules()})});
+      }
+      function combinations(arr,k){var out=[];function go(start,pick){if(pick.length===k){out.push(pick.slice());return}for(var i=start;i<=arr.length-(k-pick.length);i++){pick.push(arr[i]);go(i+1,pick);pick.pop()}}go(0,[]);return out}
+      function violations(t1,t2){var s1=new Set(t1.map(function(p){return p.id})),n=0;constraints.forEach(function(c){var together=s1.has(c.player1Id)===s1.has(c.player2Id);if((c.type==='SAME_TEAM'&&!together)||(c.type==='OPPOSITE_TEAM'&&together))n++});return n}
+      function rolePenalty(team){var basic=['TOP','JUG','MID','BOT','SUP'];return basic.reduce(function(total,r){return total+(team.some(function(p){return p.preferredRoles.indexOf(r)>-1||p.preferredRoles.indexOf('FLEX')>-1})?0:1)},0)}
+      function balance(){
+        var all=combinations(players,5),best=null;
+        all.forEach(function(t1){if(t1.indexOf(players[0])===-1)return;var ids=new Set(t1.map(function(p){return p.id})),t2=players.filter(function(p){return !ids.has(p.id)}),p1=t1.reduce(function(n,p){return n+weights[p.rank]},0),p2=t2.reduce(function(n,p){return n+weights[p.rank]},0),v=violations(t1,t2),rp=rolePenalty(t1)+rolePenalty(t2),score=v*1000+Math.abs(p1-p2)*10+rp+Math.random()*.2;if(!best||score<best.score)best={team1:t1,team2:t2,team1SkillPower:p1,team2SkillPower:p2,violations:v,score:score}});
+        return best;
+      }
+      function renderTeam(list,target){
+        $(target).innerHTML=list.map(function(p,i){return '<li class="member"><span class="member-num">'+(i+1)+'</span><div><div class="member-name">'+esc(p.name||('Người chơi '+p.id.slice(1)))+'</div><div class="roles-text">'+esc(p.preferredRoles.length?p.preferredRoles.map(function(r){return roleLabels[r]}).join(' · '):'CHƯA CHỌN VỊ TRÍ')+'</div></div><span class="rank-tag">'+esc(rankLabels[p.rank])+'</span></li>'}).join('')
+      }
+      function renderResult(){if(!result)return;renderTeam(result.team1,'#blueRoster');renderTeam(result.team2,'#redRoster');$('#bluePower').textContent=result.team1SkillPower;$('#redPower').textContent=result.team2SkillPower;var diff=Math.abs(result.team1SkillPower-result.team2SkillPower);$('#resultSummary').textContent=result.violations?'Phương án gần nhất — còn '+result.violations+' luật xung đột.':'Đã đáp ứng mọi luật bắt buộc.';$('#balanceNote').innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 3v12M18 9v12M3 6h6M15 18h6"/></svg><span>Chênh lệch sức mạnh <b>'+diff+'</b> · '+(diff===0?'cân bằng tuyệt đối':'mức chênh thấp nhất')+'</span>';$('#lastRun').textContent='CHÊNH '+diff}
+      function showToast(title,text){clearTimeout(toastTimer);$('#toastTitle').textContent=title;$('#toastText').textContent=text;$('#toast').classList.add('show');toastTimer=setTimeout(function(){$('#toast').classList.remove('show')},3200)}
+      function runAnimated(){
+        $('#generateBtn').disabled=true;$('#overlay').classList.add('show');var start=Date.now();$('#scanCount').textContent='2.0';var ticker=setInterval(function(){var left=Math.max(0,2000-(Date.now()-start));$('#scanCount').textContent=(left/1000).toFixed(1)},80);setTimeout(function(){clearInterval(ticker);result=balance();renderResult();$('#overlay').classList.remove('show');$('#generateBtn').disabled=false;if(result.violations)showToast('Đã dùng phương án gần nhất','Không thể tránh '+result.violations+' luật xung đột.');else showToast('Đã chia đội','Tất cả luật đã được đáp ứng với độ chênh kỹ năng tốt nhất.');document.querySelector('.results-section').scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'})},2000)
+      }
+      function addRule(){var a=$('#playerA').value,b=$('#playerB').value;if(!a||!b){showToast('Chọn hai người chơi','Hãy chọn cả người chơi A và người chơi B.');return}if(a===b){showToast('Chọn hai người khác nhau','Không thể tạo luật với cùng một người chơi.');return}var duplicate=constraints.some(function(c){return ((c.player1Id===a&&c.player2Id===b)||(c.player1Id===b&&c.player2Id===a))&&c.type===ruleType});if(duplicate){showToast('Luật đã tồn tại','Điều kiện này đã có trong danh sách luật.');return}constraints.push({id:'c'+Date.now()+Math.random(),player1Id:a,player2Id:b,type:ruleType});renderRules();$('#playerA').value='';$('#playerB').value=''}
+      function formatResult(){function section(label,iconChar,team,power){return iconChar+' '+label+' (Sức mạnh: '+power+')\n'+team.map(function(p,i){return (i+1)+'. '+(p.name||'Chưa đặt tên')+' ('+rankLabels[p.rank]+') - '+(p.preferredRoles.map(function(r){return roleLabels[r]}).join('/')||'Chưa chọn vị trí')}).join('\n')}return section('ĐỘI XANH','🔵',result.team1,result.team1SkillPower)+'\n-------------------\n'+section('ĐỘI ĐỎ','🔴',result.team2,result.team2SkillPower)}
+      function copyResult(){if(!result)return;var text=formatResult();if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(text).then(function(){showToast('Đã sao chép cho Discord','Đội hình đã sẵn sàng để dán.')}).catch(function(){legacyCopy(text)})}else legacyCopy(text)}
+      function legacyCopy(text){var ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();var ok=false;try{ok=document.execCommand('copy')}catch(e){}ta.remove();showToast(ok?'Đã sao chép cho Discord':'Không thể sao chép',ok?'Đội hình đã sẵn sàng để dán.':'Hãy chọn và sao chép đội hình thủ công trong trình duyệt.')}
+      function reset(){players=clonePresets();constraints=[];renderPlayers();refreshSelects();renderRules();result=balance();renderResult();showToast('Đã khôi phục đội hình','Người chơi và vị trí mặc định đã được khôi phục.')}
+      document.querySelectorAll('[data-type]').forEach(function(btn){btn.addEventListener('click',function(){ruleType=btn.dataset.type;document.querySelectorAll('[data-type]').forEach(function(b){b.classList.toggle('active',b===btn)})})});
+      $('#addRule').addEventListener('click',addRule);$('#generateBtn').addEventListener('click',runAnimated);$('#copyBtn').addEventListener('click',copyResult);$('#resetBtn').addEventListener('click',reset);
+      players=clonePresets();renderPlayers();refreshSelects();renderRules();result=balance();renderResult();
+    })();
+  </script>
+</body>
+</html>
